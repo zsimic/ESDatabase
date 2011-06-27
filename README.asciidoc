@@ -1,0 +1,32 @@
+Objective-C SQLite wrapper
+==========================
+Zoran Simic <zoran@simicweb.com>
+v1.0, September 2009
+
+Easy to use object-oriented Objective-C wrapper around SQLite (http://sqlite.org/).
+
+.How to add it to your project:
+* Add ESDatabase.h and ESDatabase.m to your project
+* Add libsqlite3.dylib to your target
+** In XCode 4, click on your project in the project navigator
+** Select your target, then the "Build Phases" tab
+** in "Link Binary With Libraries" add libsqlite3.dylib
+
+Sample code
+-----------
+
+--------------------------------------
+ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
+[db open];
+ESResultSet *r = [db execute:@"SELECT name,age,birthday FROM person"];
+while ([r next]) { NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]); }
+
+ESStatement *sthr = [db prepare:@"SELECT name,age,birthday FROM person"];
+ESResultSet *r = [sthr execute];
+while ([r next]) { NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]); }
+
+[db execute:@"UPDATE age=?,birthday=? FROM person WHERE name=?", ESDbInt(21), date, @"Joe"];
+ESStatement *sthu = [db prepare:@"UPDATE age=?,birthday=? FROM person WHERE name=?"];
+[sthu execute ESDbInt(21), date, @"Joe"];
+ESResultSet *r = [sthu execute, ESDbInt(21), date, @"Joe"]
+--------------------------------------
