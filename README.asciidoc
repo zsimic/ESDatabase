@@ -30,11 +30,15 @@ The goal of this SQLite wrapper is to:
 
 How to use this wrapper
 -----------------------
+
 * First, create a ESDatabase object:
+
 --------------------------------------
     ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
 --------------------------------------
+
 * Then, call 'open' and check if it succeeded
+
 --------------------------------------
 	if ([db open]) {
 		// OK, can use 'db'
@@ -44,11 +48,14 @@ How to use this wrapper
 		[db release];
 	}
 --------------------------------------
+
 * The call to `open` above will copy your database from the .app bundle to the documents directory on the device if needed
 * You can then call `exectute`, `prepare` etc (see code samples below and the interface in `ESDatabase.h`
 
+
 Sample code
 -----------
+
 --------------------------------------
 ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
 [db open];
