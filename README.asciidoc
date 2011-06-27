@@ -34,23 +34,40 @@ How to use this wrapper
 * First, create a ESDatabase object:
 
 --------------------------------------
-    ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
+#import "ESDatabase.h"
+ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
 --------------------------------------
 
-* Then, call 'open' and check if it succeeded
+* Then, call `open` and check if it succeeded
 
 --------------------------------------
-	if ([db open]) {
-		// OK, can use 'db'
-	} else {
-		// At this point, you will see an explanation as to why the DB
-		// couldn't be open in the debugger console (but in debug mode only)
-		[db release];
-	}
+if ([db open]) {
+	// OK, can use 'db'
+} else {
+	// At this point, you will see an explanation as to why the DB
+	// couldn't be open in the debugger console (but in debug mode only)
+	[db release];
+}
 --------------------------------------
 
-* The call to `open` above will copy your database from the .app bundle to the documents directory on the device if needed
-* You can then call `exectute`, `prepare` etc (see code samples below and the interface in `ESDatabase.h`
+* The call to `open` above will copy your database from the `.app` bundle to the documents directory on the device if needed
+* You can then call `exectute`, `prepare` etc (see code samples below and the interface in `ESDatabase.h`)
+* If `ES_DEBUG` is defined, meaningful error messages are given in the debugger console and `ESDatabase` generates an exception that will stop the debugger where the error was detected
+* Additionally, in debug mode, you have 3 properties at your disposal to help track problems: `logError`, `crashOnError` and `traceExecution`
+* In 'release mode', the 3 properties mentioned above do nothing
+* Setting `logLevel` to `YES` will generate messages in the debugger console (this is the default when `ES_DEBUG` is defined)
+* Setting `crashOnError` to `YES` will generate a hard crash as soon as an error is detected so you can inspect it right away in the debugger (this is the default when `ES_DEBUG` is defined)
+* 4 'trace levels' are also available (none by default), you can have `ESDatabase` generate a log message when:
+** objects are being released (`EST_RELEASE`)
+** when preparing/opening/closing statement (`EST_LIFE`)
+** when running queuries (`EST_QUERY`)
+** when file operations are performed, such as DB copied to device (`EST_FILE_OPERATIONS`)
+* For example, to have a `db` object not crash on error, but generate info when preparing/opening/closing statements and copying the DB file to the device you would write:
+
+--------------------------------------
+db.crashOnError = NO
+db.traceExecution = EST_LIFE | EST_FILE_OPERATIONS
+--------------------------------------
 
 
 Sample code
