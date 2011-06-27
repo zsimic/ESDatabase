@@ -5,16 +5,50 @@ v1.0, September 2009
 
 Easy to use object-oriented Objective-C wrapper around SQLite (http://sqlite.org/).
 
-.How to add it to your project:
+How to add it to your project
+-----------------------------
 * Add ESDatabase.h and ESDatabase.m to your project
 * Add libsqlite3.dylib to your target
 ** In XCode 4, click on your project in the project navigator
 ** Select your target, then the "Build Phases" tab
 ** in "Link Binary With Libraries" add libsqlite3.dylib
 
+Overview
+--------
+The goal of this SQLite wrapper is to:
+
+* provide an Objective-C interface to SQLite
+* be as good as FMDatabase (http://github.com/ccgus/fmdb)
+* allow to automatically copy a database from the .app bundle to the user directory on the device
+* there are 4 classes in the package: ESDatabase, ESStatement, ESResultSet and ESColumnInfo
+* you can create 4 kinds of ESDatabase objects:
+** read-write: the database is copied from the .app bundle to the user document folder on the device
+** read-only: the database remains in the .app bundle, you can only read from it
+** cache: the database is created once (when object is first opened) in the user document folder on the device
+** "in memory": same as "cache", but with a temporary in memory only DB
+* nice debugging support that is designed to disappear completely once you build for release
+
+How to use this wrapper
+-----------------------
+* First, create a ESDatabase object:
+--------------------------------------
+    ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
+--------------------------------------
+* Then, call 'open' and check if it succeeded
+--------------------------------------
+	if ([db open]) {
+		// OK, can use 'db'
+	} else {
+		// At this point, you will see an explanation as to why the DB
+		// couldn't be open in the debugger console (but in debug mode only)
+		[db release];
+	}
+--------------------------------------
+* The call to `open` above will copy your database from the .app bundle to the documents directory on the device if needed
+* You can then call `exectute`, `prepare` etc (see code samples below and the interface in `ESDatabase.h`
+
 Sample code
 -----------
-
 --------------------------------------
 ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
 [db open];
