@@ -78,17 +78,26 @@ Sample code
 ESDatabase *db = [ESDatabase newReadWrite:@"mydb.sqlite"];
 [db open];
 ESResultSet *r = [db execute:@"SELECT name,age,birthday FROM person"];
-while ([r next]) { NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]); }
+while ([r next]) {
+	NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]);
+}
 
 ESStatement *sthr = [db prepare:@"SELECT name,age,birthday FROM person"];
 ESResultSet *r = [sthr execute];
-while ([r next]) { NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]); }
+while ([r next]) {
+	NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]);
+}
 
-[db execute:@"UPDATE age=?,birthday=? FROM person WHERE name=?", ESDbInt(21), date, @"Joe"];
+--------------------------------------
+// Convenience update feature in ESDatabase
+[db execute:@"UPDATE age=?,birthday=? FROM person WHERE name=?", ESDbInt(21), date, @"Joe", nil];
+
+// Prepare a statement to execute many times later
 ESStatement *sthu = [db prepare:@"UPDATE age=?,birthday=? FROM person WHERE name=?"];
-[sthu execute ESDbInt(21), date, @"Joe"];
-ESResultSet *r = [sthu execute, ESDbInt(21), date, @"Joe"]
+[sthu execute ESDbInt(21), date, @"Joe", nil];
+--------------------------------------
 
+--------------------------------------
 // Example cache DB:
 ESDatabase *db = [ESDatabase newCache:@"person.sqlite"];
 [db setSchema:[NSArray arrayWithObjects:
