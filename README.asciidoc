@@ -7,11 +7,12 @@ Easy to use object-oriented Objective-C wrapper around SQLite (http://sqlite.org
 
 How to add it to your project
 -----------------------------
-* Add ESDatabase.h and ESDatabase.m to your project
-* Add libsqlite3.dylib to your target
+* Add `ESDatabase.h` and `ESDatabase.m` to your project
+* Add `libsqlite3.dylib` to your target
 ** In XCode 4, click on your project in the project navigator
 ** Select your target, then the "Build Phases" tab
-** in "Link Binary With Libraries" add libsqlite3.dylib
+** in "Link Binary With Libraries" add `libsqlite3.dylib`
+* Define `ES_DEBUG` for your 'Debug' configuration
 
 Overview
 --------
@@ -52,9 +53,9 @@ if ([db open]) {
 
 * The call to `open` above will copy your database from the `.app` bundle to the documents directory on the device if needed
 * You can then call `exectute`, `prepare` etc (see code samples below and the interface in `ESDatabase.h`)
-* If `ES_DEBUG` is defined, meaningful error messages are given in the debugger console and `ESDatabase` generates an exception that will stop the debugger where the error was detected
-* Additionally, in debug mode, you have 3 properties at your disposal to help track problems: `logError`, `crashOnError` and `traceExecution`
-* In 'release mode', the 3 properties mentioned above do nothing
+* If `ES_DEBUG` is defined, meaningful error messages are output in the debugger console and `ESDatabase` generates an exception that will stop the debugger as soon as an error is detected
+* When `ES_DEBUG` is defined, you have 3 properties at your disposal to help track problems: `logError`, `crashOnError` and `traceExecution`
+* In 'release mode' (ie: `ES_DEBUG` is not defined), the 3 properties mentioned above do nothing
 * Setting `logLevel` to `YES` will generate messages in the debugger console (this is the default when `ES_DEBUG` is defined)
 * Setting `crashOnError` to `YES` will generate a hard crash as soon as an error is detected so you can inspect it right away in the debugger (this is the default when `ES_DEBUG` is defined)
 * 4 'trace levels' are also available (none by default), you can have `ESDatabase` generate a log message when:
