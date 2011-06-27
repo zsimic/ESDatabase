@@ -88,4 +88,14 @@ while ([r next]) { NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]
 ESStatement *sthu = [db prepare:@"UPDATE age=?,birthday=? FROM person WHERE name=?"];
 [sthu execute ESDbInt(21), date, @"Joe"];
 ESResultSet *r = [sthu execute, ESDbInt(21), date, @"Joe"]
+
+// Example cache DB:
+ESDatabase *db = [ESDatabase newCache:@"person.sqlite"];
+[db setSchema:[NSArray arrayWithObjects:
+			   @"CREATE TABLE person (name VARCHAR(8) NOT NULL,age INTEGER NOT NULL,PRIMARY KEY (name))",
+			   @"CREATE UNIQUE INDEX person_name ON person (name ASC)",
+			   @"INSERT INTO person VALUES ('Johnny', 24)",
+			   @"INSERT INTO person VALUES ('Fred', 5)",
+			   nil]];
+// The statement given above will be performed only once: the first time the DB is created
 --------------------------------------
