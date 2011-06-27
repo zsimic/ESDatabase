@@ -87,6 +87,7 @@ ESResultSet *r = [sthr execute];
 while ([r next]) {
 	NSLog(@"name: %@, age: %i", [r stringValue:0], [r intValue:1]);
 }
+--------------------------------------
 
 --------------------------------------
 // Convenience update feature in ESDatabase
