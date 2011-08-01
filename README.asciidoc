@@ -5,6 +5,9 @@ v1.0, September 2009
 
 Easy to use object-oriented Objective-C wrapper around SQLite (http://sqlite.org/).
 
+If you use these classes in your project, I'd love to know about it :) Let me know: zoran@simicweb.com
+This code is otherwise released under the MIT license (http://www.opensource.org/licenses/mit-license.php)
+
 How to add it to your project
 -----------------------------
 * Add `ESDatabase.h` and `ESDatabase.m` to your project
