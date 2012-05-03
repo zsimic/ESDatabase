@@ -33,7 +33,7 @@ Synopsis:
 #define ES_DOUBLE(aDouble)		[NSNumber numberWithDouble:(aDouble)]
 
 // Trace levels
-#define EST_RELEASE 1			// Trace objects being released
+#define EST_RELEASE 1			// Trace objects being released (works only when ARC is off)
 #define EST_LIFE 2				// Trace statement preparing/opening/closing
 #define EST_QUERY 4				// Trace queries
 #define EST_FILE_OPERATIONS 8	// Trace file operations
