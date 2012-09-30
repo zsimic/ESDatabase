@@ -12,7 +12,7 @@
 
 #if __has_feature(objc_arc)
 #define ESRETAIN(v)  v
-#define ESRELEASE(v)
+#define ESRELEASE(v) v = nil
 #define ESAUTO(v)    v
 #define ES_SUPER_DEALLOC
 #else
@@ -24,7 +24,8 @@
 #if ES_DEBUG
 #define ESRELEASE(v) if ((v!=nil) && ([v retainCount]==1)) { ES_TRACE(EST_RELEASE, @"Released %@ *" #v " %@", [v class], [v description]); } [v release]; v = nil
 #else
-#define ESRELEASE(v) [v release]; v = nil		// One should *always* set to nil released objects, this macro allows to make sure not to forget that
+// One should *always* set to nil released objects, this macro allows to make sure not to forget that
+#define ESRELEASE(v) [v release]; v = nil
 #endif
 
 #endif
@@ -325,7 +326,7 @@
 }
 
 - (BOOL)isAutoCommit {						// Is this database in 'auto-commit' mode currently (ie, no explicit transaction in progress)
-	return sqlite3_get_autocommit(dbhandle);
+	return (BOOL)sqlite3_get_autocommit(dbhandle);
 }
 
 - (BOOL)setSchema:(NSArray *)aSchema {		// Set the schema of a cache DB, this is done only once, when cache DB is first created
@@ -451,9 +452,8 @@
 
 - (BOOL)execute:(NSString *)aQuery withArray:(NSArray *)args {
 	ES_CHECK(dbhandle!=nil, NO, @"Can't execute '%@': open the database first", aQuery)
-	ESStatement *s = ESRETAIN([self prepare:aQuery]);
+	ESStatement *s = [self prepare:aQuery];
 	BOOL r = [s executeWithArray:args];
-	ESRELEASE(s);
 	return r;
 }
 
@@ -463,7 +463,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	int n = pstring.length;
 	int i;
 	for (i = 0; i < n; i++) {
-		char c = [pstring characterAtIndex:i];
+		unichar c = [pstring characterAtIndex:i];
 		if (c == '?') pcount++;
 	}
 	return pcount;
@@ -708,7 +708,7 @@ int esdb_placeholderCount(NSString *pstring) {
 - (int)traceExecution { return database.traceExecution; }
 
 - (NSString *)description {
-	return ESFS(@"%@ %d hit(s) for query %@", [super description], hitCount, query);
+	return ESFS(@"%@ %ld hit(s) for query %@", [super description], hitCount, query);
 }
 
 - (int)columnIndex:(NSString *)aColumnName {
