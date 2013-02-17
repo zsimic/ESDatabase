@@ -180,7 +180,7 @@
 //#define CHUNK 16384
 //
 //
-//NSLog(@"testing unzip of database");
+//ES_LOG(@"testing unzip of database");
 //start = [NSDate date];
 //NSString *zippedDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"foo.db.gz"];
 //NSString *unzippedDBPath = [documentsDirectory stringByAppendingPathComponent:@"foo2.db"];
@@ -191,12 +191,12 @@
 //while (uncompressedLength = gzread(file, buffer, CHUNK) ) {
 //	// got data out of our file
 //	if(fwrite(buffer, 1, uncompressedLength, dest) != uncompressedLength || ferror(dest)) {
-//		NSLog(@"error writing data");
+//		ES_LOG(@"error writing data");
 //	}
 //}
 //fclose(dest);
 //gzclose(file);
-//NSLog(@"Finished unzipping database");
+//ES_LOG(@"Finished unzipping database");
 
 - (BOOL)automaticallyCopyDatabase {								// Automatically copy DB from .app bundle to device document folder if needed
 	ES_CHECK(!dbhandle, NO, @"Can't autoCopy an already open DB")
