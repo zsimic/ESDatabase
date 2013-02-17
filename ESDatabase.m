@@ -10,31 +10,11 @@
 
 #define ESFS(msg...) [NSString stringWithFormat:msg]
 
-#if __has_feature(objc_arc)
-#define ESRETAIN(v)  v
-#define ESRELEASE(v) v = nil
-#define ESAUTO(v)    v
-#define ES_SUPER_DEALLOC
-#else
-
-#define ESRETAIN(v)      [v retain]
-#define ESAUTO(v)        [v autorelease]
-#define ES_SUPER_DEALLOC [super dealloc];
-
-#if ES_DEBUG
-#define ESRELEASE(v) if ((v!=nil) && ([v retainCount]==1)) { ES_TRACE(EST_RELEASE, @"Released %@ *" #v " %@", [v class], [v description]); } [v release]; v = nil
-#else
-// One should *always* set to nil released objects, this macro allows to make sure not to forget that
-#define ESRELEASE(v) [v release]; v = nil
-#endif
-
-#endif
-
-
 // ---------------- Debug mode
 #if DEBUG
 #define ES_DEBUG 1
 #endif
+
 #if ES_DEBUG
 
 #define ES_ASSERT(cond) if (self.crashOnError) { assert(cond); }
@@ -141,9 +121,9 @@
 	ES_CHECK_NR(aName != nil && aName.length > 0, @"DB name must be provided")
 	ES_CHECK_NR(aBundle != nil || aLocal != nil, @"Bundle or local path must be provided")
 	dbhandle = 0x00;
-	name = ESRETAIN(aName);
-	pathBundle = ESRETAIN(aBundle);
-	pathLocal = ESRETAIN(aLocal);
+	name = aName;
+	pathBundle = aBundle;
+	pathLocal = aLocal;
 	ES_CHECK_NR(aBundle == nil || pathBundle != nil, @"Can't find DB '%@' in bundle", aName)
 #if ES_DEBUG
 	logError = YES;			// Default state when debugging
@@ -189,15 +169,6 @@
 - (void)dealloc {
 	[self close];
 	dbhandle = 0x00;
-	ESRELEASE(name);
-	ESRELEASE(pathBundle);
-	ESRELEASE(pathLocal);
-	ESRELEASE(columnInfo);
-	ESRELEASE(beginImmediateTransactionStatement);
-	ESRELEASE(beginExclusiveTransactionStatement);
-	ESRELEASE(commitTransactionStatement);
-	ESRELEASE(rollbackTransactionStatement);
-	ES_SUPER_DEALLOC
 }
 
 // ----------------
@@ -297,11 +268,11 @@
 	[beginExclusiveTransactionStatement close];
 	[commitTransactionStatement close];
 	[rollbackTransactionStatement close];
-	ESRELEASE(columnInfo);
-	ESRELEASE(beginImmediateTransactionStatement);
-	ESRELEASE(beginExclusiveTransactionStatement);
-	ESRELEASE(commitTransactionStatement);
-	ESRELEASE(rollbackTransactionStatement);
+	columnInfo = nil;
+	beginImmediateTransactionStatement = nil;
+	beginExclusiveTransactionStatement = nil;
+	commitTransactionStatement = nil;
+	rollbackTransactionStatement = nil;
 	int rc;
 	int retries = busyRetries;
 	while (retries>=0) {
@@ -447,7 +418,7 @@
 // --------------
 - (ESStatement *)prepare:(NSString *)aQuery {
 	ES_CHECK(dbhandle!=nil, nil, @"Can't prepare '%@': open the database first", aQuery)
-	return ESAUTO([[ESStatement alloc] initWithQuery:aQuery database:self]);
+	return [[ESStatement alloc] initWithQuery:aQuery database:self];
 }
 
 - (BOOL)execute:(NSString *)aQuery withArray:(NSArray *)args {
@@ -482,9 +453,7 @@ int esdb_placeholderCount(NSString *pstring) {
 		}
 		va_end(args);
 	}
-	BOOL result = [self execute:aQuery withArray:params];
-	ESRELEASE(params);
-	return result;
+	return [self execute:aQuery withArray:params];
 }
 
 - (ESResultSet *)select:(NSString *)aQuery withArray:(NSArray *)args {
@@ -507,15 +476,13 @@ int esdb_placeholderCount(NSString *pstring) {
 		}
 		va_end(args);
 	}
-	ESResultSet *result = [self select:aQuery withArray:params];
-	ESRELEASE(params);
-	return result;
+	return [self select:aQuery withArray:params];
 }
 
 - (BOOL)beginTransaction {
 	ES_CHECK(dbhandle != 0x00, NO, @"Can't begin transaction on non-open DB")
 	if (beginImmediateTransactionStatement == nil) {
-		beginImmediateTransactionStatement = ESRETAIN([self prepare:@"BEGIN IMMEDIATE TRANSACTION"]);
+		beginImmediateTransactionStatement = [self prepare:@"BEGIN IMMEDIATE TRANSACTION"];
 	}
 	return [beginImmediateTransactionStatement execute];
 }
@@ -523,7 +490,7 @@ int esdb_placeholderCount(NSString *pstring) {
 - (BOOL)beginExclusiveTransaction {
 	ES_CHECK(dbhandle != 0x00, NO, @"Can't begin exclusive transaction on non-open DB")
 	if (beginExclusiveTransactionStatement == nil) {
-		beginExclusiveTransactionStatement = ESRETAIN([self prepare:@"BEGIN EXCLUSIVE TRANSACTION"]);
+		beginExclusiveTransactionStatement = [self prepare:@"BEGIN EXCLUSIVE TRANSACTION"];
 	}
 	return [beginExclusiveTransactionStatement execute];
 }
@@ -532,7 +499,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	ES_CHECK(dbhandle != 0x00, NO, @"Can't commit transaction on non-open DB")
 	ES_CHECK(beginImmediateTransactionStatement != nil || beginExclusiveTransactionStatement != nil, NO, @"Can't commit without begin transaction")
 	if (commitTransactionStatement == nil) {
-		commitTransactionStatement = ESRETAIN([self prepare:@"COMMIT TRANSACTION"]);
+		commitTransactionStatement = [self prepare:@"COMMIT TRANSACTION"];
 	}
 	return [commitTransactionStatement execute];
 }
@@ -541,7 +508,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	ES_CHECK(dbhandle != 0x00, NO, @"Can't rollback transaction on non-open DB")
 	ES_CHECK(beginImmediateTransactionStatement != nil || beginExclusiveTransactionStatement != nil, NO, @"Can't rollback without begin transaction")
 	if (rollbackTransactionStatement == nil) {
-		rollbackTransactionStatement = ESRETAIN([self prepare:@"ROLLBACK TRANSACTION"]);
+		rollbackTransactionStatement = [self prepare:@"ROLLBACK TRANSACTION"];
 	}
 	return [rollbackTransactionStatement execute];
 }
@@ -594,10 +561,8 @@ int esdb_placeholderCount(NSString *pstring) {
 			tcol.default_value = [rs stringValue:4];
 			tcol.isPrimaryKey = [rs boolValue:5];
 			[tableInfo setObject:tcol forKey:tableName];
-			ESRELEASE(tcol);
 		}
 		[columnInfo setObject:tableInfo forKey:tableName];
-		ESRELEASE(tableInfo);
 	}
 	return [tableInfo objectForKey:columnName];
 }
@@ -640,8 +605,8 @@ int esdb_placeholderCount(NSString *pstring) {
 // --------------
 - (ESStatement *)initWithQuery:(NSString *)aQuery database:(ESDatabase *)aDatabase {
 	if ((self = [self init])) {
-		query = ESRETAIN(aQuery);
-		database = ESRETAIN(aDatabase);
+		query = aQuery;
+		database = aDatabase;
 		columnNameToIndexMap = nil;
 	}
 	return self;
@@ -649,10 +614,6 @@ int esdb_placeholderCount(NSString *pstring) {
 
 - (void)dealloc {
 	[self close];
-	ESRELEASE(database);
-	ESRELEASE(query);
-	ESRELEASE(columnNameToIndexMap);
-	ES_SUPER_DEALLOC
 }
 
 - (BOOL)close {
@@ -804,7 +765,6 @@ int esdb_placeholderCount(NSString *pstring) {
 		va_end(args);
 	}
 	BOOL result = [self executeWithArray:params];
-	ESRELEASE(params);
 	[self reset];
 	return result;
 }
@@ -816,7 +776,7 @@ int esdb_placeholderCount(NSString *pstring) {
 - (ESResultSet *)selectWithArray:(NSArray *)args {
 	if (![self prepare]) return nil;
 	ES_TRACE(EST_QUERY, @"select: %@", query)
-	ESResultSet *rs = ESAUTO([[ESResultSet alloc] initWithStatement:self]);
+	ESResultSet *rs = [[ESResultSet alloc] initWithStatement:self];
 	int idx = 0;
 	id obj;
 	while (idx < paramCount) {
@@ -844,9 +804,7 @@ int esdb_placeholderCount(NSString *pstring) {
 		}
 		va_end(args);
 	}
-	ESResultSet *result = [self selectWithArray:params];
-	ESRELEASE(params);
-	return result;
+	return [self selectWithArray:params];
 }
 
 - (ESResultSet *)select {
@@ -870,14 +828,9 @@ int esdb_placeholderCount(NSString *pstring) {
 // --------------
 - (ESResultSet *)initWithStatement:(ESStatement *)aStatement {
 	if ((self = [self init])) {
-		statement = ESRETAIN(aStatement);
+		statement = aStatement;
 	}
 	return self;
-}
-
-- (void)dealloc {
-	ESRELEASE(statement);
-	ES_SUPER_DEALLOC
 }
 
 // -----------------
@@ -895,7 +848,6 @@ int esdb_placeholderCount(NSString *pstring) {
 // --------------
 - (void)close {				// Close result set, object can't be used anymore after this
 	[statement reset];
-	ESRELEASE(statement);
 }
 
 - (BOOL)next {
