@@ -1,9 +1,9 @@
 //
-//  ESDatabase.m
-//  Objective-C SQLite wrapper
+// ESDatabase.m
+// Objective-C SQLite wrapper
 //
-//  Created by Zoran Simic on 9/13/09.
-//  Copyright 2009 esmiler.com. All rights reserved
+// Created by Zoran Simic on 9/13/09.
+// Copyright 2009 esmiler.com. All rights reserved
 //
 
 #import "ESDatabase.h"
@@ -37,11 +37,9 @@
 #define ES_CHECK(cond, ret, msg...) if (!(cond)) { ES_LOG(msg) ES_ASSERT(cond) return (ret); }		// Check with specified return value (when condition fails)
 
 
-// --------------------------
-// --                      --
-// --  class ESColumnInfo  --
-// --                      --
-// --------------------------
+// ------------------------
+// -- class ESColumnInfo --
+// ------------------------
 @implementation ESColumnInfo
 
 @synthesize cid;
@@ -53,11 +51,9 @@
 
 @end
 
-// ------------------------
-// --                    --
-// --  class ESDatabase  --
-// --                    --
-// ------------------------
+// ----------------------
+// -- class ESDatabase --
+// ----------------------
 
 @implementation ESDatabase
 
@@ -586,11 +582,9 @@ int esdb_placeholderCount(NSString *pstring) {
 @end
 
 
-// -------------------------
-// --                     --
-// --  class ESStatement  --
-// --                     --
-// -------------------------
+// -----------------------
+// -- class ESStatement --
+// -----------------------
 @implementation ESStatement
 
 @synthesize sthandle;
@@ -691,7 +685,7 @@ int esdb_placeholderCount(NSString *pstring) {
 // --------------
 - (BOOL)bindObject:(id)obj toColumn:(int)idx {
 	int rc;
-	ES_TRACE(EST_QUERY, @"  param #%i: %@", idx, obj)
+	ES_TRACE(EST_QUERY, @" param #%i: %@", idx, obj)
 	if ((!obj) || ((NSNull *)obj == [NSNull null])) {
 		rc = sqlite3_bind_null(sthandle, idx);
 	} else if ([obj isKindOfClass:[NSNumber class]]) {
@@ -814,11 +808,9 @@ int esdb_placeholderCount(NSString *pstring) {
 @end
 
 
-// -------------------------
-// --                     --
-// --  class ESResultSet  --
-// --                     --
-// -------------------------
+// -----------------------
+// -- class ESResultSet --
+// -----------------------
 @implementation ESResultSet
 
 @synthesize statement;

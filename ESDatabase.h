@@ -1,9 +1,9 @@
 //
-//  ESDatabase.h
-//  Objective-C SQLite wrapper
+// ESDatabase.h
+// Objective-C SQLite wrapper
 //
-//  Created by Zoran Simic on 9/13/09.
-//  Copyright 2009 esmiler.com. All rights reserved
+// Created by Zoran Simic on 9/13/09.
+// Copyright 2009 esmiler.com. All rights reserved
 
 /*
 
@@ -41,11 +41,9 @@ Synopsis:
 @class ESStatement;
 @class ESResultSet;
 
-// --------------------------
-// --                      --
-// --  class ESColumnInfo  --
-// --                      --
-// --------------------------
+// ------------------------
+// -- class ESColumnInfo --
+// ------------------------
 @interface ESColumnInfo : NSObject {
 	int cid;
 	NSString *name;
@@ -64,11 +62,9 @@ Synopsis:
 
 @end
 
-// ------------------------
-// --                    --
-// --  class ESDatabase  --
-// --                    --
-// ------------------------
+// ----------------------
+// -- class ESDatabase --
+// ----------------------
 @interface ESDatabase : NSObject {
 	sqlite3 *dbhandle;				// Underlying database handle
 	NSString *name;					// Database name (this is the basename part, without the extension)
@@ -162,11 +158,9 @@ Synopsis:
 
 @end
 
-// -------------------------
-// --                     --
-// --  class ESStatement  --
-// --                     --
-// -------------------------
+// -----------------------
+// -- class ESStatement --
+// -----------------------
 @interface ESStatement : NSObject {
 	sqlite3_stmt *sthandle;	// Underlying statement handle
 	ESDatabase *database;	// Database object that created this statement
@@ -210,11 +204,9 @@ Synopsis:
 @end
 
 
-// -------------------------
-// --                     --
-// --  class ESResultSet  --
-// --                     --
-// -------------------------
+// -----------------------
+// -- class ESResultSet --
+// -----------------------
 @interface ESResultSet : NSObject {
 	ESStatement *statement;		// Statement object from which this result set comes from
 }
