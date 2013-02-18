@@ -225,7 +225,7 @@
 		BOOL success;
 		if (localAttr != nil) {
 			success = [fileManager removeItemAtPath:pathLocal error:&error];
-			ES_CHECK(success, NO, @"Can't delete file '%@'" ,pathLocal)
+			ES_CHECK(success, NO, @"Can't delete file '%@'" , pathLocal)
 		}
 		success = [fileManager copyItemAtPath:pathBundle toPath:pathLocal error:&error];
 		ES_CHECK(success, NO, @"Can't copy database '%@' to '%@': %@", pathBundle, pathLocal, [error localizedDescription])
