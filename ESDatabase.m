@@ -196,9 +196,9 @@
 
 - (BOOL)automaticallyCopyDatabase {								// Automatically copy DB from .app bundle to device document folder if needed
 	ES_CHECK(!dbhandle, NO, @"Can't autoCopy an already open DB")
-	ES_CHECK(name!=nil, NO, @"No DB name specified")
-	ES_CHECK(pathBundle!=nil, NO, @"No .app bundle path found, this is a cache DB")
-	ES_CHECK(pathLocal!=nil, NO, @"No local document path found, this is a read-only DB")
+	ES_CHECK(name != nil, NO, @"No DB name specified")
+	ES_CHECK(pathBundle != nil, NO, @"No .app bundle path found, this is a cache DB")
+	ES_CHECK(pathLocal != nil, NO, @"No local document path found, this is a read-only DB")
 	NSError *error;
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSDictionary *localAttr = [fileManager attributesOfItemAtPath:pathLocal error:&error];
@@ -212,10 +212,10 @@
 		if ((localDate = [localAttr objectForKey:NSFileModificationDate])) {
 			ES_CHECK([fileManager fileExistsAtPath:pathBundle], NO, @"Internal error: file '%@' does not exist in .app bundle", pathBundle)
 			NSDictionary *appDBAttr = [fileManager attributesOfItemAtPath:pathBundle error:&error];
-			ES_CHECK(appDBAttr!=nil, NO, @"Internal error: can't get attributes for '%@'", pathBundle)
+			ES_CHECK(appDBAttr != nil, NO, @"Internal error: can't get attributes for '%@'", pathBundle)
 			appDBDate = [appDBAttr objectForKey:NSFileModificationDate];
 			//ESDumpDictionary(@"app db attributes", appDBAttr);
-			ES_CHECK(appDBDate!=nil, NO, @"Internal error: can't get last modification date for '%@'", pathBundle)
+			ES_CHECK(appDBDate != nil, NO, @"Internal error: can't get last modification date for '%@'", pathBundle)
 			needsCopy = [appDBDate compare:localDate] == NSOrderedDescending;
 		} else {
 			needsCopy = YES;
@@ -237,10 +237,10 @@
 
 - (BOOL)open {
 	if (dbhandle) return YES;						// Already open
-	ES_CHECK(name!=nil, NO, @"No DB name specified")
+	ES_CHECK(name != nil, NO, @"No DB name specified")
 	if (pathBundle != nil && pathLocal != nil) [self automaticallyCopyDatabase];
 	NSString *path = pathLocal != nil ? pathLocal : pathBundle;
-	ES_CHECK(path!=nil, NO, @"No DB path could be determined for DB '%@'", name)
+	ES_CHECK(path != nil, NO, @"No DB path could be determined for DB '%@'", name)
 #if SQLITE_VERSION_NUMBER >= 3005000
 	int err = 0;
 	if (openFlags != 0) {
@@ -251,8 +251,8 @@
 #else
 	int err = sqlite3_open([path fileSystemRepresentation], &dbhandle);
 #endif
-	ES_CHECK(err==SQLITE_OK, NO, @"Can't open DB '%@' path '%@': %d", name, path, err)
-	ES_CHECK(dbhandle!=nil, NO, @"Internal error: nil dbhandle for DB '%@', path '%@'", name, path)
+	ES_CHECK(err == SQLITE_OK, NO, @"Can't open DB '%@' path '%@': %d", name, path, err)
+	ES_CHECK(dbhandle != nil, NO, @"Internal error: nil dbhandle for DB '%@', path '%@'", name, path)
 	ES_TRACE(EST_LIFE, @"Opened DB '%@', path '%@'", name, path)
 	return YES;
 }
@@ -271,7 +271,7 @@
 	rollbackTransactionStatement = nil;
 	int rc;
 	int retries = busyRetries;
-	while (retries>=0) {
+	while (retries >= 0) {
 		rc = sqlite3_close(dbhandle);
 		if (rc == SQLITE_BUSY) {
 			if (retries-- > 0) {
@@ -335,7 +335,7 @@
 #endif
 
 - (void)setBusyRetries:(int)aBusyRetries {
-	ES_CHECK_NR(aBusyRetries>=0, @"'busyRetries' must be >=0, %i not allowed", aBusyRetries)
+	ES_CHECK_NR(aBusyRetries >= 0, @"'busyRetries' must be >= 0, %i not allowed", aBusyRetries)
 	busyRetries = aBusyRetries;
 }
 
@@ -413,12 +413,12 @@
 // SQL operations
 // --------------
 - (ESStatement *)prepare:(NSString *)aQuery {
-	ES_CHECK(dbhandle!=nil, nil, @"Can't prepare '%@': open the database first", aQuery)
+	ES_CHECK(dbhandle != nil, nil, @"Can't prepare '%@': open the database first", aQuery)
 	return [[ESStatement alloc] initWithQuery:aQuery database:self];
 }
 
 - (BOOL)execute:(NSString *)aQuery withArray:(NSArray *)args {
-	ES_CHECK(dbhandle!=nil, NO, @"Can't execute '%@': open the database first", aQuery)
+	ES_CHECK(dbhandle != nil, NO, @"Can't execute '%@': open the database first", aQuery)
 	ESStatement *s = [self prepare:aQuery];
 	BOOL r = [s executeWithArray:args];
 	return r;
@@ -453,7 +453,7 @@ int esdb_placeholderCount(NSString *pstring) {
 }
 
 - (ESResultSet *)select:(NSString *)aQuery withArray:(NSArray *)args {
-	ES_CHECK(dbhandle!=nil, nil, @"Can't select '%@': open the database first", aQuery)
+	ES_CHECK(dbhandle != nil, nil, @"Can't select '%@': open the database first", aQuery)
 	ESStatement *s = [self prepare:aQuery];
 	ESResultSet *r = [s selectWithArray:args];
 	return r;
@@ -525,7 +525,7 @@ int esdb_placeholderCount(NSString *pstring) {
 		NSString *tname = [rs stringValue:0];
 		NSString *tsql = [rs stringValue:1];
 		if (tname != nil && tsql != nil && (aTableName == nil || [[aTableName lowercaseString] isEqualToString:tname])) {
-			if (sql.length > 0 && [sql characterAtIndex:sql.length-1] != '\n') {
+			if (sql.length > 0 && [sql characterAtIndex:sql.length - 1] != '\n') {
 				[sql appendString:@"\n"];
 			}
 			[sql appendString:tsql];
@@ -635,7 +635,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	ES_TRACE(EST_LIFE, @"prepare: %@", query)
 	int rc = SQLITE_ERROR;
 	int retries = self.busyRetries;
-	while (retries>=0) {
+	while (retries >= 0) {
 		rc = sqlite3_prepare(database.dbhandle, [query UTF8String], -1, &sthandle, 0);
 		if (rc == SQLITE_BUSY && retries-- > 0) {
 			if (retries <= 0) {
@@ -648,7 +648,7 @@ int esdb_placeholderCount(NSString *pstring) {
 			retries = -1;
 		}
 	}
-	ES_CHECK(rc==SQLITE_OK, NO, @"Can't prepare '%@': %i", query, rc)
+	ES_CHECK(rc == SQLITE_OK, NO, @"Can't prepare '%@': %i", query, rc)
 	paramCount = sqlite3_bind_parameter_count(sthandle);
 	columnCount = sqlite3_column_count(sthandle);
 	return YES;
@@ -707,7 +707,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	} else {
 		rc = sqlite3_bind_text(sthandle, idx, [[obj description] UTF8String], -1, SQLITE_STATIC);
 	}
-	ES_CHECK(rc==SQLITE_OK, NO, @"Can't bind param #%i to '%@': %i", idx, obj, rc)
+	ES_CHECK(rc == SQLITE_OK, NO, @"Can't bind param #%i to '%@': %i", idx, obj, rc)
 	return YES;
 }
 
@@ -724,10 +724,10 @@ int esdb_placeholderCount(NSString *pstring) {
 		if (![self bindObject:obj toColumn:idx]) stop = YES;
 	}
 	ES_CHECK(!stop, NO, @"Could not bind param %i for query '%@'", idx, query)
-	ES_CHECK(idx==paramCount, NO, @"Got %i params while expecting %i for query '%@'", idx, paramCount, query)
+	ES_CHECK(idx == paramCount, NO, @"Got %i params while expecting %i for query '%@'", idx, paramCount, query)
 	int rc = SQLITE_ERROR;
 	int retries = self.busyRetries;
-	while (retries>=0) {
+	while (retries >= 0) {
 		rc = sqlite3_step(sthandle);
 		if ((rc == SQLITE_BUSY) && (retries-- > 0)) {
 			if (retries <= 0) {
@@ -738,9 +738,9 @@ int esdb_placeholderCount(NSString *pstring) {
 			retries = -1;
 		}
 	}
-	ES_CHECK(rc==SQLITE_DONE || rc==SQLITE_ROW, NO, @"Error calling sqlite3_step (code %d: %@)", rc, database.lastErrorMessage)
+	ES_CHECK(rc == SQLITE_DONE || rc == SQLITE_ROW, NO, @"Error calling sqlite3_step (code %d: %@)", rc, database.lastErrorMessage)
 	hitCount++;
-	return (rc==SQLITE_DONE || rc == SQLITE_ROW);
+	return (rc == SQLITE_DONE || rc == SQLITE_ROW);
 }
 
 - (BOOL)execute:(id)arg1, ... {					// Execute with a variable number of arguments
@@ -778,7 +778,7 @@ int esdb_placeholderCount(NSString *pstring) {
 		idx++;
 		if (![self bindObject:obj toColumn:idx]) return nil;
 	}
-	ES_CHECK(idx==paramCount, nil, @"Got %i params while expecting %i in %@", idx, paramCount, query)
+	ES_CHECK(idx == paramCount, nil, @"Got %i params while expecting %i in %@", idx, paramCount, query)
 	hitCount++;
 	return rs;
 }
@@ -846,7 +846,7 @@ int esdb_placeholderCount(NSString *pstring) {
 	if (statement == nil) return NO;
 	int rc = SQLITE_ERROR;
 	int retries = self.busyRetries;
-	while (retries>=0) {
+	while (retries >= 0) {
 		rc = sqlite3_step(statement.sthandle);
 		if (rc == SQLITE_BUSY && retries-- > 0) {
 			if (retries <= 0) {
@@ -858,7 +858,7 @@ int esdb_placeholderCount(NSString *pstring) {
 			retries = -1;
 		}
 	}
-	ES_CHECK(rc==SQLITE_DONE || rc==SQLITE_ROW, NO, @"Error calling sqlite3_step (code %d: %@)", rc, statement.database.lastErrorMessage)
+	ES_CHECK(rc == SQLITE_DONE || rc == SQLITE_ROW, NO, @"Error calling sqlite3_step (code %d: %@)", rc, statement.database.lastErrorMessage)
 	if (rc != SQLITE_ROW) [self close];
 	return (rc == SQLITE_ROW);
 }
@@ -867,91 +867,91 @@ int esdb_placeholderCount(NSString *pstring) {
 // Data retrieval by index
 // -----------------------
 - (int)intValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, 0, @"Invalid int column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, 0, @"Invalid int column %i requested for %@", aColumnIndex, statement.query)
 	return sqlite3_column_int(statement.sthandle, aColumnIndex);
 }
 
 - (long)longValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, 0, @"Invalid long column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, 0, @"Invalid long column %i requested for %@", aColumnIndex, statement.query)
 	return (long)sqlite3_column_int64(statement.sthandle, aColumnIndex);
 }
 
 - (long long int)longLongIntValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, 0, @"Invalid long long int column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, 0, @"Invalid long long int column %i requested for %@", aColumnIndex, statement.query)
 	return sqlite3_column_int64(statement.sthandle, aColumnIndex);
 }
 
 - (BOOL)boolValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, NO, @"Invalid bool column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, NO, @"Invalid bool column %i requested for %@", aColumnIndex, statement.query)
 	return [self intValue:aColumnIndex] != 0;
 }
 
 - (float)floatValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, 0, @"Invalid float column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, 0, @"Invalid float column %i requested for %@", aColumnIndex, statement.query)
 	return (float)sqlite3_column_double(statement.sthandle, aColumnIndex);
 }
 
 - (double)doubleValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, 0, @"Invalid double column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, 0, @"Invalid double column %i requested for %@", aColumnIndex, statement.query)
 	return sqlite3_column_double(statement.sthandle, aColumnIndex);
 }
 
 - (NSString *)stringValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid string column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid string column %i requested for %@", aColumnIndex, statement.query)
 	const char *c = (const char *)sqlite3_column_text(statement.sthandle, aColumnIndex);
 	if (!c) return nil;		// null row.
 	NSString *s = [NSString stringWithUTF8String:c];
 #if ES_DEBUG
-	if (s==nil) { ES_LOG(@"--> [%s] -> []", c) }
+	if (s == nil) { ES_LOG(@"--> [%s] -> []", c) }
 #endif
 	return s;
 }
 
 - (NSDate *)dateValueWithTimeIntervalSince1970:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
 	return [NSDate dateWithTimeIntervalSince1970:[self doubleValue:aColumnIndex]];
 }
 
 - (NSDate *)dateValueCCYYMMDD:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
 	static NSDateFormatter *dateFormatter = nil;
-	if (dateFormatter==nil) {
+	if (dateFormatter == nil) {
 		dateFormatter = [[NSDateFormatter alloc] init];
 		[dateFormatter setDateFormat:@"yyyyMMdd"];
 	}
 	NSString *s = [self stringValue:aColumnIndex];
-	if (s==nil) return nil;
+	if (s == nil) return nil;
 	return [dateFormatter dateFromString:s];
 }
 
 - (NSDate *)dateValueCCYYMMDDdashed:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
 	static NSDateFormatter *dateFormatter = nil;
-	if (dateFormatter==nil) {
+	if (dateFormatter == nil) {
 		dateFormatter = [[NSDateFormatter alloc] init];
 		[dateFormatter setDateFormat:@"yyyy-MM-dd"];
 	}
 	NSString *s = [self stringValue:aColumnIndex];
-	if (s==nil) return nil;
+	if (s == nil) return nil;
 	return [dateFormatter dateFromString:s];
 }
 
 - (NSDate *)dateValueCCYYMMDDslashed:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid date column %i requested for %@", aColumnIndex, statement.query)
 	static NSDateFormatter *dateFormatter = nil;
-	if (dateFormatter==nil) {
+	if (dateFormatter == nil) {
 		dateFormatter = [[NSDateFormatter alloc] init];
 		[dateFormatter setDateFormat:@"yyyy/MM/dd"];
 	}
 	NSString *s = [self stringValue:aColumnIndex];
-	if (s==nil) return nil;
+	if (s == nil) return nil;
 	return [dateFormatter dateFromString:s];
 }
 
 - (NSData *)dataValue:(int)aColumnIndex {
-	ES_CHECKF(aColumnIndex>=0 && aColumnIndex<statement.columnCount, nil, @"Invalid data column %i requested for %@", aColumnIndex, statement.query)
+	ES_CHECKF(aColumnIndex >= 0 && aColumnIndex < statement.columnCount, nil, @"Invalid data column %i requested for %@", aColumnIndex, statement.query)
 	int dataSize = sqlite3_column_bytes(statement.sthandle, aColumnIndex);
-	if (dataSize<=0) return nil;
+	if (dataSize <= 0) return nil;
 	NSMutableData *data = [NSMutableData dataWithLength:dataSize];
 	memcpy([data mutableBytes], sqlite3_column_blob(statement.sthandle, aColumnIndex), dataSize);
 	return data;
